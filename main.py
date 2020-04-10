@@ -7,17 +7,18 @@ from keras.models import Sequential, load_model
 from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 
-start_time = time.time()
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # hides warnings
+
+start_time = time.time()
+img_width, img_height = 200, 200
 
 train_data_dir = os.getcwd() + '/datasets/asl_alphabet_train/asl_alphabet_train/'
 test_data_dir = os.getcwd() + '/datasets/asl_alphabet_test/'
 
-img_width, img_height = 200, 200
-
-if os.path.isfile('model_permanent.h5'):
-    model = load_model('model_permanent.h5')
+if os.path.isfile('trained_model.h5') and os.path.isfile('trained_history.npy'):
+    model = load_model('trained_model.h5')
+    trained_history = np.load('trained_history.npy', allow_pickle=True).item()
+    model.summary()
 else:
     epochs = 10
     batch_size = 29
@@ -40,6 +41,8 @@ else:
     model.add(Dropout(0.5))
     model.add(Dense(256, activation='relu'))
     model.add(Dense(29, activation='softmax'))
+
+    model.summary()
 
     model.compile(optimizer='rmsprop',
                   loss='categorical_crossentropy',
@@ -78,9 +81,9 @@ else:
         validation_data=validation_generator,
         validation_steps=STEP_SIZE_VALID)
 
-    # model.save_weights('model_weights.h5')
+    trained_history = history.history
+    np.save('model_history', trained_history)
     model.save('model.h5')
-
     model.evaluate_generator(validation_generator, STEP_SIZE_VALID, verbose=1)
 
 test_datagen = ImageDataGenerator(rescale=1. / 255)
@@ -95,9 +98,7 @@ test_generator = test_datagen.flow_from_directory(
 STEP_SIZE_TEST = test_generator.n // test_generator.batch_size
 test_generator.reset()
 
-prediction = model.predict_generator(test_generator,
-                                     steps=STEP_SIZE_TEST,
-                                     verbose=1)
+prediction = model.predict_generator(test_generator, steps=STEP_SIZE_TEST, verbose=1)
 
 predicted_class_indices = np.argmax(prediction, axis=1)
 
@@ -109,20 +110,22 @@ filenames = test_generator.filenames
 results = pd.DataFrame({"Filename": filenames, "Predictions": predictions})
 results.to_csv('results.csv', index=False)
 
-plt.plot(history.history['categorical_accuracy'])
-plt.plot(history.history['val_categorical_accuracy'])
+plt.plot(trained_history['categorical_accuracy'])
+plt.plot(trained_history['val_categorical_accuracy'])
 plt.title('Model Accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
+plt.savefig('model_accuracy.png')
 plt.show()
 
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
+plt.plot(trained_history['loss'])
+plt.plot(trained_history['val_loss'])
 plt.title('Model Loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
+plt.savefig('model_loss.png')
 plt.show()
 
 hours, rem = divmod(time.time() - start_time, 3600)
