@@ -1,0 +1,6 @@
+datasets
+model.h5
+model_accuracy.png
+model_history.npy
+model_loss.png
+results.csv
