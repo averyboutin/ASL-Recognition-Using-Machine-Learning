@@ -36,12 +36,7 @@ while True:
                       optimizer='rmsprop',
                       metrics=['accuracy'])
         # predicting image
-        x = image.img_to_array(resizedImage)
-        x = np.expand_dims(x, axis=0)
 
-        images = np.vstack([x])
-        classes = model.predict_classes(images, batch_size=10)
-        print(classes)
         img_counter += 1
 
 cam.release()
