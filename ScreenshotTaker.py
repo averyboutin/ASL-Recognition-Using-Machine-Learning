@@ -3,12 +3,17 @@ from keras.preprocessing import image
 import numpy as np
 import cv2
 
-
 cam = cv2.VideoCapture(0)
 
 cv2.namedWindow("test")
 
 img_counter = 0
+
+# load model
+model = load_model('model.h5')
+model.compile(loss='binary_crossentropy',
+              optimizer='rmsprop',
+              metrics=['accuracy'])
 
 while True:
     ret, frame = cam.read()
@@ -30,11 +35,6 @@ while True:
         src = cv2.imread("frame_{}.png".format(img_counter))
         dsize = (200, 200)
         resizedImage = cv2.resize(src, dsize)
-        # load model
-        model = load_model('model.h5')
-        model.compile(loss='binary_crossentropy',
-                      optimizer='rmsprop',
-                      metrics=['accuracy'])
         # predicting image
 
         img_counter += 1
