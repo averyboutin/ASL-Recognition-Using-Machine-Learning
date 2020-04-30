@@ -1,4 +1,8 @@
+from keras.models import load_model
+from keras.preprocessing import image
+import numpy as np
 import cv2
+
 
 cam = cv2.VideoCapture(0)
 
@@ -26,10 +30,18 @@ while True:
         src = cv2.imread("frame_{}.png".format(img_counter))
         dsize = (200, 200)
         resizedImage = cv2.resize(src, dsize)
-        # run screenshot through model
+        # load model
+        model = load_model('model.h5')
+        model.compile(loss='binary_crossentropy',
+                      optimizer='rmsprop',
+                      metrics=['accuracy'])
+        # predicting image
+        x = image.img_to_array(resizedImage)
+        x = np.expand_dims(x, axis=0)
 
-
-
+        images = np.vstack([x])
+        classes = model.predict_classes(images, batch_size=10)
+        print(classes)
         img_counter += 1
 
 cam.release()
