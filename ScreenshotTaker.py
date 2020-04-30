@@ -22,7 +22,12 @@ while True:
         img_name = "frame_{}.png".format(img_counter)
         cv2.imwrite(img_name, frame)
         print("{} saved!".format(img_name))
-        # runs screenshot through model
+        # resize screenshot
+        src = cv2.imread("frame_{}.png".format(img_counter))
+        dsize = (200, 200)
+        resizedImage = cv2.resize(src, dsize)
+        # run screenshot through model
+
 
 
         img_counter += 1
