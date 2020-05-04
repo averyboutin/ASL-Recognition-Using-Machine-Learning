@@ -8,15 +8,14 @@ cam = cv2.VideoCapture(0)
 cv2.namedWindow("test")
 
 img_counter = 0
+labels = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
+          "W", "X", "Y", "Z"]
 
 # load model
-model = load_model('model.h5')
-model.compile(loss='binary_crossentropy',
-              optimizer='rmsprop',
-              metrics=['accuracy'])
+model = load_model('./model/trained_model.h5')
 model.compile(optimizer='rmsprop',
               loss='categorical_crossentropy',
-              metrics=['categorical_accuracy'])
+              metrics=['accuracy'])
 
 while True:
     ret, frame = cam.read()
@@ -37,16 +36,17 @@ while True:
 
         # resize screenshot
         src = cv2.imread("frame_{}.png".format(img_counter))
-        dsize = (200, 200)
+        dsize = (100, 100)
         resizedImage = cv2.resize(src, dsize)
+        resizedImage = cv2.cvtColor(resizedImage, cv2.COLOR_BGR2GRAY)
 
         # predicting image
         x = image.img_to_array(resizedImage)
         x = np.expand_dims(x, axis=0)
         images = np.vstack([x])
-        classes = model.predict_classes(images, batch_size=10)
-        print(classes)
-        print(classes[0])
+        pred = model.predict_classes(images)
+        print(pred)
+
         img_counter += 1
 
 cam.release()
