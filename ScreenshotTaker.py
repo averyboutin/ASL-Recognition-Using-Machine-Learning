@@ -14,6 +14,9 @@ model = load_model('model.h5')
 model.compile(loss='binary_crossentropy',
               optimizer='rmsprop',
               metrics=['accuracy'])
+model.compile(optimizer='rmsprop',
+              loss='categorical_crossentropy',
+              metrics=['categorical_accuracy'])
 
 while True:
     ret, frame = cam.read()
@@ -31,12 +34,19 @@ while True:
         img_name = "frame_{}.png".format(img_counter)
         cv2.imwrite(img_name, frame)
         print("{} saved!".format(img_name))
+
         # resize screenshot
         src = cv2.imread("frame_{}.png".format(img_counter))
         dsize = (200, 200)
         resizedImage = cv2.resize(src, dsize)
-        # predicting image
 
+        # predicting image
+        x = image.img_to_array(resizedImage)
+        x = np.expand_dims(x, axis=0)
+        images = np.vstack([x])
+        classes = model.predict_classes(images, batch_size=10)
+        print(classes)
+        print(classes[0])
         img_counter += 1
 
 cam.release()
