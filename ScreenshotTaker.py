@@ -45,8 +45,10 @@ while True:
         x = np.expand_dims(x, axis=0)
         images = np.vstack([x])
         pred = model.predict_classes(images)
-        print(pred)
-
+        blah = pred.tolist()
+        print(blah)
+        pred_label = labels[blah[0]]
+        print(pred_label)
         img_counter += 1
 
 cam.release()
